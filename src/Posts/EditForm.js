@@ -1,14 +1,16 @@
-import React, { useContext } from "react";
+import React from "react";
 import { useFormik } from "formik";
 import { useNavigate } from 'react-router-dom';
 import editValidate from "./postValidate";
-import PostContext from "../Context/PostContext";
+import { useDispatch, useSelector } from "react-redux";
+import { editPost } from "../actions/actions";
 
 
-const EditForm = ({ post, setIsShowing }) => {
+const EditForm = ({ post, setIsShowing, id }) => {
     const validate = editValidate
     const navigate = useNavigate();
-    const { posts, setPosts } = useContext(PostContext)
+    const posts = useSelector(state => state.posts)
+    const dispatch = useDispatch()
 
     // needs to be let, values change upon edit
     let initialValues = {
@@ -20,15 +22,13 @@ const EditForm = ({ post, setIsShowing }) => {
     const formik = useFormik({
         initialValues,
         validate,
-        onSubmit: values => editPost(values),
+        onSubmit: values => formEditPost(values),
     })
 
- 
-    const editPost = async (values) => {
-        // values coming out of form don't contain id or comments
-        values.id = post.id;
+    // form values don't contain post comments, have to add them manually
+    const formEditPost = async (values) => {
         values.comments = post.comments;
-        const editedPosts = posts.map(p => (p.title === post.title ? values : p))
+        posts[id] = values
 
         // populate form with new post values
         initialValues = formik.values
@@ -36,7 +36,8 @@ const EditForm = ({ post, setIsShowing }) => {
         formik.resetForm({
             values: initialValues
         })
-        setPosts(editedPosts)
+
+        dispatch(editPost(posts))
         goBack()
     }
 

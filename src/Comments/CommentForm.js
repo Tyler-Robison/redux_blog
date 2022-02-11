@@ -1,34 +1,30 @@
-import React, { useContext } from "react";
+import React from "react";
 import { useFormik } from "formik";
 import commentValidate from "./commentValidate";
-import PostContext from "../Context/PostContext";
 import { v4 as uuid } from 'uuid'
+import { useSelector, useDispatch } from "react-redux";
+import { addComment } from "../actions/actions";
 
-const CommentForm = ({ post }) => {
+const CommentForm = ({ post, id }) => {
     const validate = commentValidate
-    const { posts, setPosts } = useContext(PostContext)
+    const posts = useSelector(state => state.posts)
+    const dispatch = useDispatch()
 
     const formik = useFormik({
         initialValues: {
             comment: ''
         },
         validate,
-        onSubmit: values => addComment(values),
+        onSubmit: values => formAddComment(values),
     })
 
-    const addComment = (values) => {
+    const formAddComment = (values) => {
         values.id = uuid()
 
-        const editedPosts = posts.map(p => {
-            if (p.id === post.id) {
-                p.comments.push(values)
-                return p
-            } else {
-                return p
-            }
-        })
+        posts[id].comments.push(values)
+
         formik.resetForm()
-        setPosts(editedPosts)
+        dispatch(addComment(posts))
     }
 
 

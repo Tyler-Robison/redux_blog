@@ -1,20 +1,21 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import PostContext from "../Context/PostContext";
 import EditForm from "./EditForm";
 import CommentForm from "../Comments/CommentForm";
 import CommentList from "../Comments/CommentList";
+import { useSelector, useDispatch } from "react-redux";
+import { removePost } from "../actions/actions";
 import './PostDetail.css'
 
 const PostDetail = () => {
     const { id } = useParams();
-    const { posts, setPosts } = useContext(PostContext)
     const [isShowing, setIsShowing] = useState(false)
     const navigate = useNavigate()
+    const posts = useSelector(state => state.posts)
+    const dispatch = useDispatch()
 
-
-    const post = posts.filter(p => p.id === id)[0]
-    console.log(posts)
+    // const post = posts.filter(p => p.id === id)[0]
+    const post = posts[id]
 
     // If post is deleted re-direct to homepage
     if (!post) navigate('/')
@@ -24,7 +25,7 @@ const PostDetail = () => {
     }
 
     const deletePost = () => {
-        setPosts(posts.filter(p => p.id !== post.id))
+        dispatch(removePost(posts, id))
     }
 
     // prevents crashing upon post deletion, allows re-direct to occur
@@ -41,16 +42,18 @@ const PostDetail = () => {
                             <button onClick={deletePost}>Delete Post</button>
                         </div>
                         <div> {isShowing &&
-                            <EditForm post={post} setIsShowing={setIsShowing} />}
+                            <EditForm post={post} setIsShowing={setIsShowing} id={id} />}
                         </div>
                     </div>
                 </div>
 
-                <CommentList post={post} />
-                <CommentForm post={post} />
+                <CommentList post={post} id={id} />
+                <CommentForm post={post} id={id} />
             </div>
         )
-    } else {
+    }
+    // prevents crashing upon post deletion, allows re-direct to occur
+    else {
         return (
             <div></div>
         )

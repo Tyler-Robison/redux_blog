@@ -1,14 +1,15 @@
-import React, {useContext} from "react";
+import React from "react";
 import { useFormik } from "formik";
 import { useNavigate } from 'react-router-dom';
 import postValidate from "./postValidate";
-import PostContext from "../Context/PostContext";
 import {v4 as uuid} from 'uuid'
+import { useDispatch } from "react-redux";
+import { addPost } from "../actions/actions";
 
 const PostForm = () => {
     const validate = postValidate
     const navigate = useNavigate();
-    const { posts, setPosts } = useContext(PostContext)
+    const dispatch = useDispatch()
 
     const formik = useFormik({
         initialValues: {
@@ -21,17 +22,15 @@ const PostForm = () => {
     })
 
     const createPost = async (values) => {
-        // assign id and blank comments array
-        values.id = uuid()
+        // id will be a key inside the posts object
+        const id = uuid()
         values.comments = [];
-        setPosts([...posts, values ])
+        dispatch(addPost(values, id))
         goHome()
     }
 
     const goHome = () => navigate('/')
     
-
-
     return (
         <div>
             <h1>Create New Post</h1>
